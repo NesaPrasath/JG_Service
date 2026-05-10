@@ -1,6 +1,6 @@
-const Auth = require("../models/Authenticate");
+const Auth = require("../models/Authenticate.js");
 const jwt = require("jsonwebtoken");
-const sendMail = require("../middleware/sendMailer");
+const sendMail = require("../middleware/sendMailer.js");
 require("dotenv").config();
 
 // ✅ Generate OTP + Send Email
