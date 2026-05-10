@@ -1,16 +1,21 @@
-const Auth = require("../models/Auth");
+const Auth = require("../models/Authenticate");
 const jwt = require("jsonwebtoken");
 const sendMail = require("../middleware/sendMailer");
-
+require("dotenv").config();
 
 // ✅ Generate OTP + Send Email
 exports.generateOTP = async (req, res) => {
   try {
-    const { email } = req.body;
+    const {email} = process.env.ADMIN_EMAIL;
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
     const expiry = new Date(Date.now() + 5 * 60 * 1000); // 5 mins
+
+    await Auth.updateMany(
+      { status: "L" },
+      { $set: { status: "N" } }
+    );
 
     const record = await Auth.create({
       email,
@@ -20,8 +25,8 @@ exports.generateOTP = async (req, res) => {
 
     // 📩 Send OTP mail
     await sendMail(
-      email,
-      "Your Admin OTP",
+      "csnesaprasath@gmail.com",
+      "OTP Verification",
       `
         <h3>OTP Verification</h3>
         <p>Your OTP is:</p>
@@ -57,14 +62,13 @@ exports.verifyOTP = async (req, res) => {
     }
 
     if (record.expired_on < new Date()) {
+    // ❗ Step 1: Invalidate ALL existing tokens
+      await Auth.updateMany(
+        { status: "L" },
+        { $set: { status: "N" } }
+      );
       return res.status(400).json({ message: "OTP expired" });
     }
-
-    // ❗ Step 1: Invalidate ALL existing tokens
-    await Auth.updateMany(
-      { status: "L" },
-      { $set: { status: "N" } }
-    );
 
     // ❗ Step 2: Generate new JWT
     const token = jwt.sign(
