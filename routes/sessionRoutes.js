@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { createSession, getSessions,getTodaySession } = require("../controllers/SessionConstroller.js");
+const { createSession, getSessions,getTodaySession } = require("../controller/SessionConstroller.js");
 const auth = require("../middleware/authMiddleware.js");
 
 router.post("/session", auth, createSession);
